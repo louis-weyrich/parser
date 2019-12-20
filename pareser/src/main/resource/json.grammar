@@ -1,0 +1,87 @@
+{
+	$grammar:={
+		$type:=json;
+		$life-cycle-start:=%start;
+		$life-cycle-end:=%end;
+	
+		#start:{
+			$type:=$statement; 
+			$value:={"{"} & { {%object} | {%array} | {%name-value-pair} }+ & {"}"} };
+		}
+		
+		#name:{
+			$type:=$token;
+			$value:={ {"\""} & { [a-zA-Z0-9][a-zA-Z0-9._-]* } & {"\""} };
+		}
+	
+		#name-value-pair:{
+			$type:=$statement;
+			$value:={ {%name} & {":"} & {%value} & { {","}- }- };
+		}
+	
+		#object:{
+			$type:=$nested;
+			$value:={ {%name} & {":"} & {"{"} & { {%object} | {%array} | {%name-value-pair} }+ & {"}"} & { {","}- }- };
+		}
+	
+		#array:{
+			$#type:=$nested;
+			$value:={ {%name} & {":"} & { {"["} & { { { {"\""}+ & {%value} & {"\""} } | { {"{"} & { {%named-value-pair} & {"}"} | {%array} } & { {","}- }- } & {"]"} & { {","}- }- } };
+		}
+	
+		#value:{
+			$type:=$token;
+			$value:={ {"\""} & { [\x00-\x7F] }+ & {"\""} } | {%boolean} | {%number} };
+		}
+	
+		#boolean:{
+			$type:=$token;
+			$value:={ {"\""} & { {"true"} | {"false"} } & {"\""} };
+		}
+		
+		#number:{
+			$type:=$token;
+			$value:=[0-9.,-]*
+		}
+		
+		/# comment #/
+		#end:{
+			
+		}
+	};
+
+	$entities:{
+		"and":"&",
+		"dblquo":"\"",
+		"squote":"'",
+		"lbrace":"{",
+		"rbrace":"}",
+		"lbrkt":"[",
+		"rbrkt":"]",
+		"lparen":"(",
+		"rparen":")",
+		"gt":"<",
+		"lt":">",
+		"bslsh":"\\",
+		"fslsh":"/",
+		"plus":"+",
+		"minus":"-",
+		"asterisk":"*",
+		"perc":"%",
+		"at":"@",
+		"hash":"#",
+		"excl":"!",
+		"dlr":"$",
+		"spc":" ",
+		"colon":":",
+		"semi":";",
+		"period":".",
+		"quest":"?",
+		"comma":","
+		"pound":"#"
+	}
+
+	$keywords:{
+		"keywords","entities","grammar","grammar-start","main","tokens","ignorable-tokens","token","nested","statement"
+	}
+}

@@ -1,0 +1,6 @@
+{
+	select * from my_table where name = 'text';
+	"tokens":"{}[]:";
+	"tokenSets": ["\\'","\\\",","/**","*/"];
+	
+}

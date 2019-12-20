@@ -1,0 +1,29 @@
+package com.sos.parser;
+
+public class ParserObject {
+	
+	private String content;
+	private String token;
+
+	public ParserObject(String content, String token) {
+		this.content = content;
+		this.token = token;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
+
+}

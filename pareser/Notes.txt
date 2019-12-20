@@ -1,0 +1,157 @@
+• Sequence: This is a sequence of elements such as the values in an array
+initializer.
+
+• Choice: This is a choice between multiple, alternative phrases such as
+the different kinds of statements in a programming language.
+
+• Token dependence: The presence of one token requires the presence of
+its counterpart elsewhere in a phrase such as matching left and right
+parentheses.
+
+• Nested phrase: This is a self-similar language construct such as nested
+arithmetic expressions or nested statement blocks in a programming
+language.
+
+• A Component is a self contained expression.  Usually an incomplete 
+part of a whole statement in the language.
+
+
+PARSER CONFIGURATION
+--------------------
+The parser configuration file is a *.json file.
+The json file configures how the parser works.
+The following are the configurations:
+	• "tokens":".[]{}\n\r\t"  -  A list of tokens to send to the lexer
+	• "tokenSets": ["\\'","\\\""]  -  A list of tokens that come in pairs.
+	• "ignorableTokens":" \n\r\t"  -  A list of tokens that the parser will parse but ignore.
+	• "nestQuotes":"true"  -  ignore data nested in quotes.
+	• "nestedTokens":["{}", "[]", "''", "()", "<>"]  -  tokens that nest other tokens.
+	• "grammar-file":"./src/main/resource/initailize.grammer"  -  The file that contains the grammar definitions.
+
+
+GRAMMAR 
+--------------------
+expression:					
+keyword:        			$e
+Named-grammar-block:    	:e
+Entity:						@entityName;
+static-text:   				{"any number of text, number, entity, and/or symbol"}
+Sequence-And-Choice:   		{ :e1 && :e2 && "static-token"}
+Sequence-Or-choice:     	{ :e1 || :e2 || "static-token"}
+Ordered choice: 			{ :e1 // :e2  // "static-token"}
+Concatenate:    			{ :e1 } & { :e2 } & {"static-token"}
+Comment:					/# Comment #/
+
+
+CONSTRAINTS
+--------------------
+Group-Start:					"{"
+Group-End:						"}"
+Regular-Expression-Start		"["
+Regular-Expression-End			"]"
+Regular-Expression-statement	[a-zA-Z0-9._-]
+
+Not-Allowed:					{e}!
+Zero-or-One:					{e}-
+Zero-or-More:					{e}*
+Required-One-or-More:			[e]+
+Required-One-Only:				[e]?
+Required-One-Only:				[e]
+
+
+GRAMMAR KEYWORDS:
+---------------------
+keywords, grammar, grammar-main, start, end, tokens, token, nested, statement
+
+
+EXAMPLES:
+---------------------
+{
+	"$grammar:json":{
+		"$grammar-main:$start":{
+			{"{"} & { :object || :array || :named-value-pair }+ & {"}"}
+		},	
+		"object:$nested":{
+			{:name} & {":"} & {"{"} & { :object || :array || :named-value-pair }+ & {"}"} & { {","}- }?
+		},
+		"array:$nested":{
+			{:name} & {":"} & { {"["} & { { { {"\""}+ & {:value} & {"\""} } || { {"{"} & {:named-value-pair} & {"}"} || {:array} } & { {","}- }? } & {"]"} & { {","}- }? }
+		},
+		"value:$token":{
+			{ {"\""} & { [\x00-\x7F] }+ & {"\""} } || {:boolean} || {:number} }
+		},
+		"name:$token":{
+			{"\""} & { [a-zA-Z0-9][a-zA-Z0-9._-]* } & {"\""}
+		},
+		"name-value-pair:$statement":{
+			{:name} & {":"} & {:value} & { {","}- }?
+		},
+		"value:$token":{
+			{ {"\""} & { [\x00-\x7F] }+ & {"\""} } | {:boolean} | {:number} }
+		},
+		"boolean:$token":{
+			{ {"\""} & { {"true"} || {"false"} } & {"\""}
+		},
+		"number:$token":{
+			[0-9.,-]*
+		},
+		"$grammar-main:$end":{
+			/* comment */
+		}
+	}
+}
+
+
+GRAMMAR RULES
+---------------------
+• This is a case sensitive language.  So case matters.
+• Whitespace, tabs, and carriage returns are ignored.
+• First there is the grammar definition.  
+	The "$" indicates it is a keyword.  
+	After the colon, is the name of the grammar type, (ie: this grammar file defines json).
+• Next is the required "$grammar-main:$start".  This is the starting point for all grammar definitions.
+	• At the beginning of all json data, there must be one "{", 
+	• then either and object, array, or value, one or more times.
+• if any token begins with "$" then is a keyword for that language and can not be used unless instructed in the language,
+• The rest of the definition is called a "named-grammar-blocks", (example ":object").
+• Optional is "$grammar-main:$end".  This defines any construct you would like to define for the end of the grammar language.
+• After the name of the block is ": $token | $statement | $nested
+	• A token is a block or static text or regular expression.
+	• A statement is string or components ending in a terminated complete statement.
+	• Nest has wrapped tokens, statements, or other nested blocks.
+• To add a comment, wrap it in /# ... #/.
+	• Comments can only be outside of named-grammar-blocks.
+
+• When data is wrapped in [...], this is a component.
+• Any data between {...} that is quoted is static text (example {"Hello"}).
+• Any data between {...} that begins with ":" is a named grammar block (example {:if-statement}).
+• Any data between [...] that is unquoted is a regular expression (example [a-zA-Z0-9]).
+• Any data between {...} that has nested {...} is evaluated together (example { [a-zA-Z0-9][a-zA-Z0-9._-]* }).
+• When any component is join by "&", the components are concatenated (example [:name] & [":"] & [:value]).
+• When any component is join by "||", the components are a choice (example [ [:object] | [:array] | [:name-value-pair] ]).
+• When any component is join by "&&" there is an and decision .
+
+• If a component ends in "+" it must repeat one or more times (example {...}+).
+• If a component ends in "-" it can repeat zero or one times (example {...}-).
+• If a component ends in "*" it can repeat zero or more times (example {...}*).
+• If a component ends in "!" can never be present (example {...}!).
+• If a component ends in "?" it is present only once and is required (example {...}?).
+• If a component does not end with any of these, it is required one time. Same as "?" (example {...}).
+
+
+GRAMMAR TOKENS
+---------------------
+"{", "}", "[", "]", "\"", "/", "+", "-", "*", "#", "!", ":", ",", "=", "&", "|", "$", "\n", "\r", "\t"
+
+If you use one of the tokens in your grammar language, it must be wrapped in quotes.
+
+BUILT IN DATA TYPES
+---------------------
+• Number
+• Precision
+• Boolean
+• Text
+• Date
+• Time
+• Date/Time
+

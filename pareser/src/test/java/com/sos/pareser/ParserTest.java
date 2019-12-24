@@ -48,8 +48,9 @@ public class ParserTest {
 		
 		try {
 			LanguageParser parser = new LanguageParser("./src/main/resource/json_parser.json", listener);
-			NodeContainer node = parser.parse(new FileInputStream(new File("./src/main/resource/initialize.json")));
+			NodeContainer node = parser.parse(new FileInputStream(new File("./src/main/resource/App.java")));
 			
+			assertNotNull(node);
 			assertTrue(node.getType() == NodeType.DOCUMENT);
 			
 		} catch (FileNotFoundException e) {

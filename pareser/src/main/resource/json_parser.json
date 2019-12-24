@@ -16,10 +16,5 @@
 		{"match":["(",")"]}
 	],
 	"matchQuotes":"true",
-	"keywords": ["select","from","where","in","ignorableTokens","tokens","statementEnd","token","matchedTokens","matchQuotes"],
-	"entities":[
-		{"and":"&"},{"dblquo":"\""},{"squote":"'"},{"lbrace":"{"},{"rbrace":"}"},
-		{"lbracket":"["},{"rbracket":"]"},{"gt":"<"},{"lt":">"},{"bslash":"\\"},
-		{"fslash":"/"},{"plus":"+"},{"minus":"-"},{"asterisk":"*"},{"percent":"%"},
-		{"at":"@"},{"pound":"#"},{"excl":"!"},{"dollar":"$"},{"space":" "} ]
+	"keywords": ["package","class","public","static","void"]
 }

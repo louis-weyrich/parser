@@ -1,14 +1,17 @@
 package com.sos.parser.node;
 
 import com.sos.parser.ParserContext;
+import com.sos.parser.ParserObject;
 import com.sos.parser.exception.ParserException;
 
 public class NodeException implements NodeContainer {
 
 	private Exception exception;
+	private ParserObject object;
 	
-	public NodeException(Exception exception) {
+	public NodeException(Exception exception, ParserObject object) {
 		this.addContent(exception);
+		this.object = object;
 	}
 
 	public void addContent(Object content) 
@@ -26,6 +29,11 @@ public class NodeException implements NodeContainer {
 
 	public NodeType getType() {
 		return NodeType.NODE_EXCEPTION;
+	}
+	
+	public ParserObject getParserobject()
+	{
+		return this.object;
 	}
 
 

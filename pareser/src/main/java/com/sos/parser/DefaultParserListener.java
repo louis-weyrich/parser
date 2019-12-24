@@ -19,67 +19,80 @@ import com.sos.parser.node.QuotedText;
 import com.sos.parser.node.Statement;
 import com.sos.parser.node.Text;
 import com.sos.parser.node.Token;
-import com.sos.parser.utils.Stack;
-import com.sos.parser.utils.UtilStack;
+import com.sos.parser.utils.linkedlist.LinkedList;
 
 /**
  * @author louisweyrich
  *
- */
-public class DefaultParserListener implements ParserListener {
+ */ 
+public class DefaultParserListener implements ParserListener 
+{
 
 	private ParserContext context;
-	private Stack <NodeContainer> nodeStack;
+	private LinkedList <NodeContainer> nodeStack;
 	private List <Exception> exceptions;
 	
 	/**
 	 * 
 	 */
-	public DefaultParserListener() {
-		nodeStack = new UtilStack <NodeContainer> ();
+	public DefaultParserListener() 
+	{
+		nodeStack = new LinkedList <NodeContainer> ();
 		exceptions = new ArrayList <Exception>();
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#startDocument()
 	 */
-	public void startDocument() {
-		nodeStack.push(new Document());
+	public void startDocument() 
+	{
+		nodeStack.pushTop(new Document());
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#endDocument()
 	 */
-	public void endDocument() throws ParserException {
-		NodeContainer container = nodeStack.pop();
+	public void endDocument(ParserObject parserObject) throws ParserException 
+	{
+		NodeContainer container = nodeStack.popTop();
 		try
 		{
 			container.validate(context);
 		}
 		catch(ParserException e)
 		{
-			container.addContent(new NodeException(e));
+			container.addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
+
+		if(nodeStack.peekTop() != null)
+		{
+			NodeContainer nextContainer = nodeStack.peekTop();
+			nextContainer.addContent(container);
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to end document.");
+			container.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
 		
-		if(nodeStack.peek() != null)
-		{
-			nodeStack.peek().addContent(container);
-		}
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#startStatement(com.sos.parser.ParserObject)
 	 */
-	public void startStatement() {
-		nodeStack.push(new Statement());;
+	public void startStatement() 
+	{
+		nodeStack.pushTop(new Statement());;
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#endStatement(com.sos.parser.ParserObject)
 	 */
-	public void endStatement(ParserObject parserObject) throws ParserException {
-		NodeContainer container = nodeStack.pop();
+	public void endStatement(ParserObject parserObject) throws ParserException 
+	{
+		NodeContainer container = nodeStack.popTop();
 		container.addContent(new Token(parserObject.getContent()));
 		
 		try
@@ -88,20 +101,31 @@ public class DefaultParserListener implements ParserListener {
 		}
 		catch(ParserException e)
 		{
-			container.addContent(new NodeException(e));
+			container.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
 		
-		nodeStack.peek().addContent(container);
+		if(nodeStack.peekTop() != null)
+		{
+			NodeContainer nextContainer = nodeStack.peekTop();
+			nextContainer.addContent(container);
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to end statement.");
+			container.addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#parsedToken(com.sos.parser.ParserObject)
 	 */
-	public void parsedToken(ParserObject parserObject) throws ParserException {
+	public void parsedToken(ParserObject parserObject) throws ParserException 
+	{
 		Token token = new Token(parserObject.getContent());
-		NodeContainer container = nodeStack.peek();
-		container.addContent(token);
+		NodeContainer container = nodeStack.peekTop();
+		
 		
 		try
 		{
@@ -109,36 +133,39 @@ public class DefaultParserListener implements ParserListener {
 		}
 		catch(ParserException e)
 		{
-			container.addContent(new NodeException(e));
+			container.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
 		
+		container.addContent(token);
 	}
 
 
 	/**
 	 * @see com.sos.parser.ParserListener#startNestedBlock(com.sos.parser.ParserObject)
 	 */
-	public void startNestedBlock(ParserObject parserObject) {
-		NodeContainer node = nodeStack.peek();
+	public void startNestedBlock(ParserObject parserObject) 
+	{
+		NodeContainer node = nodeStack.peekTop();
 		if(node.getType() == NodeType.STATEMENT)
 		{
 			Statement statement = (Statement)node;
 			if(statement.getChildren().size() == 0)
 			{
-				nodeStack.pop();
+				nodeStack.popTop();
 			}
 		}
 		
-		nodeStack.push(new Block(new Token(parserObject.getContent())));
+		nodeStack.pushTop(new Block(new Token(parserObject.getContent())));
 		startStatement();
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#endNestedBlock(com.sos.parser.ParserObject)
 	 */
-	public void endNestedBlock(ParserObject parserObject) throws ParserException {
-		NodeContainer container = nodeStack.pop();
+	public void endNestedBlock(ParserObject parserObject) throws ParserException 
+	{
+		NodeContainer container = nodeStack.popTop();
 		
 		try
 		{
@@ -146,17 +173,28 @@ public class DefaultParserListener implements ParserListener {
 		}
 		catch(ParserException e)
 		{
-			container.addContent(new NodeException(e));
+			container.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
 		
-		nodeStack.peek().addContent(container);
+		if(nodeStack.peekTop() != null)
+		{
+			NodeContainer nextContainer = nodeStack.peekTop();
+			nextContainer.addContent(container);
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to end nested block.");
+			container.addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#parsedIgnorableTokens(com.sos.parser.ParserObject)
 	 */
-	public void parsedIgnorableToken(ParserObject parserObject) throws ParserException {
+	public void parsedIgnorableToken(ParserObject parserObject) throws ParserException 
+	{
 		IgnorableToken it = new IgnorableToken(parserObject.getContent());
 		
 		try
@@ -165,23 +203,36 @@ public class DefaultParserListener implements ParserListener {
 		}
 		catch(ParserException e)
 		{
-			it.addContent(new NodeException(e));
+			it.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
 		
-		nodeStack.peek().addContent(it);
+		if(nodeStack.peekTop() != null)
+		{
+			nodeStack.peekTop().addContent(it);
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to add ignorable token.");
+			nodeStack.peekTop().addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
 	}
 
 	/**
 	 * @see com.sos.parser.ParserListener#setParserContext(com.sos.parser.ParserContext)
 	 */
-	public void setParserContext(ParserContext context) {
+	public void setParserContext(ParserContext context) 
+	{
 		this.context = context; 
-
 	}
 
-	public void tokenNotAllowed(ParserObject parsedObject) throws ParserException {
-		NotAllowed notAllowed = new NotAllowed(parsedObject.getContent());
+	/**
+	 * 
+	 */
+	public void tokenNotAllowed(ParserObject parserObject) throws ParserException 
+	{
+		NotAllowed notAllowed = new NotAllowed(parserObject.getContent());
 		
 		try
 		{
@@ -189,31 +240,83 @@ public class DefaultParserListener implements ParserListener {
 		}
 		catch(ParserException e)
 		{
-			notAllowed.addContent(new NodeException(e));
+			notAllowed.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
 		
-		nodeStack.peek().addContent(notAllowed);;
+		if(nodeStack.peekTop() != null)
+		{
+			nodeStack.peekTop().addContent(notAllowed);
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to add token not allowed.");
+			nodeStack.peekTop().addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
 	}
 	
-	public void exceptions(Exception exception) {
-		nodeStack.peek().addContent(new NodeException(exception));
+	/**
+	 * 
+	 */
+	public void exceptions(Exception exception) 
+	{
 		exceptions.add(exception);
 	}
 
-	public void startQuotedText(ParserObject parserObject) {
+	/**
+	 * 
+	 */
+	public void startQuotedText(ParserObject parserObject) 
+	{
 		QuotedText text = new QuotedText();
 		text.addContent(new Token(parserObject.getContent()));
-		nodeStack.push(text);
+		
+		try
+		{
+			text.validate(context);
+		}
+		catch(ParserException e)
+		{
+			text.addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
+		
+		if(nodeStack.peekTop() != null)
+		{
+			nodeStack.pushTop(text);
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to start quoted text.");
+			nodeStack.peekTop().addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
 	}
 	
+	/**
+	 * 
+	 */
 	public void addText(ParserObject parserObject)
 	{
-		nodeStack.peek().addContent(new Text(parserObject.getContent()));
+		if(nodeStack.peekTop().getType() != NodeType.QUOTED_TEXT)
+		{
+			nodeStack.peekTop().addContent(new Text(parserObject.getContent()));
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to add text("+parserObject.getContent()+")");
+			nodeStack.peekTop().addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
 	}
 
-	public void endQuotedText(ParserObject parserObject) throws ParserException {
-		NodeContainer container = nodeStack.pop();
+	/**
+	 * 
+	 */
+	public void endQuotedText(ParserObject parserObject) throws ParserException 
+	{
+		NodeContainer container = nodeStack.popTop();
 		container.addContent(new Token(parserObject.getContent()));
 		
 		try
@@ -222,20 +325,61 @@ public class DefaultParserListener implements ParserListener {
 		}
 		catch(ParserException e)
 		{
-			container.addContent(new NodeException(e));
+			container.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
 		
-		nodeStack.peek().addContent(container);
+		if(nodeStack.peekTop() != null)
+		{
+			nodeStack.peekTop().addContent(container);
+		}
+		else
+		{
+			ParserException e = new ParserException("Unable to end quoted text("+parserObject.getContent()+")");
+			nodeStack.peekTop().addContent(new NodeException(e, parserObject));
+			exceptions.add(e);
+		}
 	}
 
+	/**
+	 * 
+	 */
 	public void parsedKeyword(ParserObject parserObject) throws ParserException
 	{
-		nodeStack.peek().addContent(new Keyword(parserObject.getContent()));
+		if(nodeStack.peekTop() != null)
+		{
+			nodeStack.peekTop().addContent(new Keyword(parserObject.getContent()));
+		}
+		else
+		{
+			ParserException e = new ParserException("unable to add keyword("+parserObject.getContent()+")");
+			exceptions.add(e);
+			nodeStack.peekTop().addContent(new NodeException(e, parserObject));
+		}
 	}
 	
-	public Stack <NodeContainer> getStack()
+	/**
+	 * 
+	 */
+	public LinkedList <NodeContainer> getStack()
 	{
 		return nodeStack;
 	}
+
+	public void parsedTokenSet(ParserObject parserObject) throws ParserException {
+//		NodeContainer node = nodeStack.peekTop();
+//		node.addContent(new TokenSet(parserObject.getContent()));
+//		
+//		try
+//		{
+//			node.validate(context);
+//		}
+//		catch(ParserException e)
+//		{
+//			node.addContent(new NodeException(e));
+//			exceptions.add(e);
+//			
+//		}
+	}
+	
 }

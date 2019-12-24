@@ -22,7 +22,7 @@ public class StatementConditional implements Conditional {
 	public StatementConditional() {}
 
 	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object) throws ParserException {
-		NodeContainer container = listener.getStack().peek();
+		NodeContainer container = listener.getStack().peekTop();
 		if(object.getContent().equals(context.getStatementEnd().toString()) && container.getType() == NodeType.STATEMENT)
 		{
 			listener.endStatement(object);

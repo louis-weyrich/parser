@@ -22,8 +22,8 @@ import com.sos.parser.conditional.NotAllowedConditional;
 import com.sos.parser.conditional.QuoteConditional;
 import com.sos.parser.conditional.StatementConditional;
 import com.sos.parser.conditional.TokenConditional;
+//import com.sos.parser.conditional.TokenSetConditional;
 import com.sos.parser.exception.ParserException;
-import com.sos.parser.node.Document;
 import com.sos.parser.node.NodeContainer;
 
 public class LanguageParser {
@@ -198,6 +198,7 @@ public class LanguageParser {
 		conditionals.add(new QuoteConditional());
 		conditionals.add(new KeywordConditional());
 		conditionals.add(new NotAllowedConditional());
+//		conditionals.add(new TokenSetConditional());
 		conditionals.add(new BlockConditional());
 		conditionals.add(new StatementConditional());
 		conditionals.add(new TokenConditional());
@@ -261,8 +262,8 @@ public class LanguageParser {
 		}
 		
 		this.parser.close();
-		listener.endDocument();
-		return listener.getStack().pop();
+		listener.endDocument(new ParserObject("",0,0,null));
+		return listener.getStack().popTop();
 	}
 	
 	

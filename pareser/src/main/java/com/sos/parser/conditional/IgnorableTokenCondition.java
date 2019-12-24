@@ -14,12 +14,9 @@ public class IgnorableTokenCondition implements Conditional {
 	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object)
 	throws ParserException 
 	{
-		NodeContainer node = listener.getStack().peek();
-		if(object.getContent().equals("\n") && (node.getType() == NodeType.DOCUMENT || node.getType() == NodeType.BLOCK))
-		{
-			listener.startStatement();
-		}
-		else if(context.getIgnorableSet().contains(object.getContent().charAt(0)))
+		String content = object.getContent();
+		
+		if(content.length() > 0 && context.getIgnorableSet().contains(content.charAt(0)))
 		{
 			if(context.isShowIgnorables()) 
 			{

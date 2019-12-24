@@ -14,7 +14,7 @@ public class QuoteConditional implements Conditional {
 	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object)
 	throws ParserException 
 	{
-		NodeContainer container = listener.getStack().peek();
+		NodeContainer container = listener.getStack().peekTop();
 		String value = object.getContent();
 		if(context.isMatchQuotes())
 		{

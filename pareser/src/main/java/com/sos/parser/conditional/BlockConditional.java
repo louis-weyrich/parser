@@ -16,7 +16,7 @@ public class BlockConditional implements Conditional {
 	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object)
 	throws ParserException 
 	{
-		NodeContainer container = listener.getStack().peek();
+		NodeContainer container = listener.getStack().peekTop();
 		MatchedTokenSet tokens = context.getMatchedTokens();
 		
 		if(tokens.containsStart(object.getContent()))

@@ -2,7 +2,7 @@ package com.sos.parser;
 
 import com.sos.parser.exception.ParserException;
 import com.sos.parser.node.NodeContainer;
-import com.sos.parser.utils.Stack;
+import com.sos.parser.utils.linkedlist.LinkedList;
 
 public interface ParserListener {
 	
@@ -14,7 +14,7 @@ public interface ParserListener {
 	/**
 	 * 
 	 */
-	public void endDocument() throws ParserException;
+	public void endDocument(ParserObject parserObject) throws ParserException;
 	
 	/**
 	 * 
@@ -87,6 +87,13 @@ public interface ParserListener {
 	
 	/**
 	 * 
+	 * @param parserObject
+	 * @throws ParserException
+	 */
+	public void parsedTokenSet(ParserObject parserObject) throws ParserException;
+	
+	/**
+	 * 
 	 * @param exception
 	 */
 	public void exceptions(Exception object);
@@ -95,5 +102,5 @@ public interface ParserListener {
 	 * 
 	 * @return
 	 */
-	public Stack <NodeContainer> getStack();
+	public LinkedList <NodeContainer> getStack();
 }

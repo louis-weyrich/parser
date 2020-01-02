@@ -1,0 +1,20 @@
+{
+	"bufferSize":"256",
+	"autoMarkBuffer":"true",
+	"initialBufferSize":"20",
+	"bufferGrowthSize":"20",
+	"tokens":[" ", "&", "|", "{", "}", "(", ")", "[","]","\"", "'", ",", ":", "\n", "\r", "\t", "@", ";", "="],
+	"tokenSets": ["//","/#","#/"],
+	"tokensNotAllowed":["`", "~"],
+	"ignorableTokens":[" ","\n","\r","\t",","],
+	"showIgnorable":"false",
+	"statementEnd":[";"],
+	"matchedTokens":
+	[
+		{"match":["{","}"]},
+		{"match":["/*","*/"]},
+		{"match":["/**","*/"]}
+	],
+	"matchQuotes":"true",
+	"keywords": ["package","class","public","static","void","String"]
+}

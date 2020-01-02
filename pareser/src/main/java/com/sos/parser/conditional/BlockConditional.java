@@ -4,8 +4,10 @@ import com.sos.parser.ParserContext;
 import com.sos.parser.ParserListener;
 import com.sos.parser.ParserObject;
 import com.sos.parser.exception.ParserException;
+import com.sos.parser.node.Block;
 import com.sos.parser.node.NodeContainer;
 import com.sos.parser.node.NodeType;
+import com.sos.parser.node.Token;
 import com.sos.parser.utils.MatchedTokenSet;
 import com.sos.parser.utils.MatchedTokenSet.MatchedToken;
 
@@ -13,24 +15,35 @@ public class BlockConditional implements Conditional {
 
 	public BlockConditional() {}
 
-	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object)
+	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject parserObject)
 	throws ParserException 
 	{
 		NodeContainer container = listener.getStack().peekTop();
 		MatchedTokenSet tokens = context.getMatchedTokens();
 		
-		if(tokens.containsStart(object.getContent()))
+		if(tokens.containsStart(parserObject.getContent()))
 		{
-			listener.startNestedBlock(object);
+			listener.startNestedBlock(parserObject);
 			return true;
 		}
-		else if(container.getType() == NodeType.BLOCK && tokens.containsStart(container.getContent().toString()))
+		else if(container.getType() == NodeType.BLOCK)
 		{
-			MatchedToken matched = tokens.getByStart(container.getContent().toString());
-			if(matched.getEnd() == container.getContent().toString())
+			Block block = (Block)container;
+			
+			if(block.getChildren().size() > 0)
 			{
-				listener.endNestedBlock(object);
-				return true;
+				NodeContainer node = block.getChildren().get(0);
+				
+				if(node.getType() == NodeType.TOKEN)
+				{
+					Token token = (Token)node;
+					MatchedToken matched = tokens.getByStart(token.getContent());
+					if(matched.getEnd().equals(parserObject.getContent().toString()))
+					{
+						listener.endNestedBlock(parserObject);					
+						return true;
+					}
+				}
 			}
 		}
 		return false;

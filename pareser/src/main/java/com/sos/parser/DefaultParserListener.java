@@ -54,7 +54,7 @@ public class DefaultParserListener implements ParserListener
 	 */
 	public void endDocument(ParserObject parserObject) throws ParserException 
 	{
-		NodeContainer container = nodeStack.popTop();
+		NodeContainer container = nodeStack.peekTop();
 		try
 		{
 			container.validate(context);
@@ -64,19 +64,6 @@ public class DefaultParserListener implements ParserListener
 			container.addContent(new NodeException(e, parserObject));
 			exceptions.add(e);
 		}
-
-		if(nodeStack.peekTop() != null)
-		{
-			NodeContainer nextContainer = nodeStack.peekTop();
-			nextContainer.addContent(container);
-		}
-		else
-		{
-			ParserException e = new ParserException("Unable to end document.");
-			container.addContent(new NodeException(e, parserObject));
-			exceptions.add(e);
-		}
-		
 	}
 
 	/**
@@ -146,18 +133,7 @@ public class DefaultParserListener implements ParserListener
 	 */
 	public void startNestedBlock(ParserObject parserObject) 
 	{
-		NodeContainer node = nodeStack.peekTop();
-		if(node.getType() == NodeType.STATEMENT)
-		{
-			Statement statement = (Statement)node;
-			if(statement.getChildren().size() == 0)
-			{
-				nodeStack.popTop();
-			}
-		}
-		
 		nodeStack.pushTop(new Block(new Token(parserObject.getContent())));
-		startStatement();
 	}
 
 	/**
@@ -166,6 +142,7 @@ public class DefaultParserListener implements ParserListener
 	public void endNestedBlock(ParserObject parserObject) throws ParserException 
 	{
 		NodeContainer container = nodeStack.popTop();
+		container.addContent(new Token(parserObject.getContent()));
 		
 		try
 		{
@@ -181,6 +158,12 @@ public class DefaultParserListener implements ParserListener
 		{
 			NodeContainer nextContainer = nodeStack.peekTop();
 			nextContainer.addContent(container);
+			
+			if(nextContainer.getType() == NodeType.STATEMENT)
+			{
+				endStatement(
+					new ParserObject("",parserObject.getStartIndex(),parserObject.getEndIndex(), null));
+			}
 		}
 		else
 		{

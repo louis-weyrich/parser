@@ -19,10 +19,8 @@ import com.sos.parser.DefaultParserListener;
 import com.sos.parser.LanguageParser;
 import com.sos.parser.ParserListener;
 import com.sos.parser.exception.ParserException;
-import com.sos.parser.node.Document;
 import com.sos.parser.node.NodeContainer;
 import com.sos.parser.node.NodeType;
-import com.sos.parser.utils.Stack;
 
 public class ParserTest {
 
@@ -40,6 +38,7 @@ public class ParserTest {
 
 	@After
 	public void tearDown() throws Exception {
+	
 	}
 
 	@Test
@@ -47,7 +46,7 @@ public class ParserTest {
 		ParserListener listener = new DefaultParserListener();
 		
 		try {
-			LanguageParser parser = new LanguageParser("./src/main/resource/json_parser.json", listener);
+			LanguageParser parser = new LanguageParser("./src/main/resource/java_parser.json", listener);
 			NodeContainer node = parser.parse(new FileInputStream(new File("./src/main/resource/App.java")));
 			
 			assertNotNull(node);

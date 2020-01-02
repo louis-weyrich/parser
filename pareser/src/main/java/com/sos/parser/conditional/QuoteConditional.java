@@ -25,6 +25,11 @@ public class QuoteConditional implements Conditional {
 			}
 			else if(container.getType() != NodeType.QUOTED_TEXT && (value.equals("\"") || value.equals("\'")))
 			{
+				if(listener.getStack().peekTop().getType() != NodeType.STATEMENT)
+				{
+					listener.startStatement();
+				}
+				
 				listener.startQuotedText(object);
 				return true;
 			}

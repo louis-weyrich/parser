@@ -31,4 +31,9 @@ public class LinkedNode<E> {
 		return child;
 	}
 
+	public void clear()
+	{
+		this.object = null;
+		this.child = null;
+	}
 }

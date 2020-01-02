@@ -44,7 +44,18 @@ public class LinkedList<E> {
 	
 	public void clear()
 	{
+		int tempSize = size;
 		
+		for(int index = 0; index < tempSize; index++)
+		{
+			LinkedNode <E> node = first;
+			first = node.popChildNode();
+			node.clear();
+			size--;
+		}
+		
+		end.clear();
+		end = null;
 	}
 	
 	/**
@@ -73,7 +84,7 @@ public class LinkedList<E> {
 	 */
 	public E peekEnd()
 	{
-		return end.getObject();
+		return (end != null)? end.getObject() : null;
 	}
 	
 	/**
@@ -82,7 +93,7 @@ public class LinkedList<E> {
 	 */
 	public E peekTop()
 	{
-		return first.getObject();
+		return (first != null)? first.getObject() : null;
 	}
 	
 	/**
@@ -91,15 +102,23 @@ public class LinkedList<E> {
 	 */
 	public E popTop()
 	{
-		LinkedNode <E> tempNode = first;
-		first = first.popChildNode();
-		E object = tempNode.getObject();
-		size--;
-		if(first == null)
+		if(first != null)
 		{
-			end = null;
+			LinkedNode <E> tempNode = first;
+			first = first.popChildNode();
+			E object = tempNode.getObject();
+			tempNode.clear();
+			size--;
+			if(first == null)
+			{
+				end = null;
+			}
+			return object;
 		}
-		return object;
+		else
+		{
+			return null;
+		}
 	}
 	
 	/**

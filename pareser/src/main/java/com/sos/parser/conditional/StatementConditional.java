@@ -23,15 +23,10 @@ public class StatementConditional implements Conditional {
 
 	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object) throws ParserException {
 		NodeContainer container = listener.getStack().peekTop();
+		
 		if(object.getContent().equals(context.getStatementEnd().toString()) && container.getType() == NodeType.STATEMENT)
 		{
 			listener.endStatement(object);
-			listener.startStatement();
-			return true;
-		}
-		else if(container.getType() == NodeType.DOCUMENT || container.getType() == NodeType.BLOCK)
-		{
-			listener.startStatement();
 			return true;
 		}
 		

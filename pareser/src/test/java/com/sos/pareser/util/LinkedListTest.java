@@ -1,6 +1,9 @@
-package com.sos.pareser;
+package com.sos.pareser.util;
 
 import java.util.Iterator;
+
+import static org.junit.Assert.*;
+
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -46,6 +49,18 @@ public class LinkedListTest  {
 		{
 			System.out.println(iterator.next());
 		}
+		
+		for(int index = 5; index > 0; index--)
+		{
+			list.pushTop(new Integer(index));
+		}
+
+		
+		list.clear();
+		
+		Integer i = list.peekTop();
+		assertNull(i);
+		assertTrue(list.size() == 0);
 	}
 
 }

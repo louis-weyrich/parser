@@ -4,9 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 
-import com.sos.parser.exception.ParserException;
-import com.sos.parser.utils.CharacterSet;
-
 public interface Parser {
 
 	public void parse(String content);

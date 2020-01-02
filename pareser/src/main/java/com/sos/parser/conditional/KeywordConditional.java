@@ -4,6 +4,7 @@ import com.sos.parser.ParserContext;
 import com.sos.parser.ParserListener;
 import com.sos.parser.ParserObject;
 import com.sos.parser.exception.ParserException;
+import com.sos.parser.node.NodeType;
 
 public class KeywordConditional implements Conditional {
 
@@ -14,6 +15,10 @@ public class KeywordConditional implements Conditional {
 	{
 		if(context.getKeywords().contains(object.getContent()))
 		{
+			if(listener.getStack().peekTop().getType() != NodeType.STATEMENT)
+			{
+				listener.startStatement();
+			}
 			listener.parsedKeyword(object);
 			return true;
 		}

@@ -21,10 +21,11 @@ public abstract class ChildContainer extends ContentContainer
 	@Override
 	public void addContent(Object content)
 	{
-		if(content instanceof String)
+		if(content instanceof String) {
 			super.addContent(content);
-		else
+		}else {
 			children.add((NodeContainer)content);
+		}
 	}
 
 	

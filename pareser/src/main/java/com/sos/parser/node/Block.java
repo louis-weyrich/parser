@@ -8,6 +8,7 @@ public class Block extends ChildContainer{
 	public Block(Object content) {
 		super();
 		this.addContent(content);
+		this.content = content.toString();
 	}
 
 	@Override

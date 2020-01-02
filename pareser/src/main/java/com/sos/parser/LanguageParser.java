@@ -230,14 +230,15 @@ public class LanguageParser {
 	 * @throws IOException
 	 * @throws ParserException
 	 */
-	private NodeContainer execute() throws IOException, ParserException {
-		
+	private NodeContainer execute() throws IOException, ParserException 
+	{
 		if (parser.hasNextParserObject()) {
 			listener.setParserContext(context);
 			listener.startDocument();
-			listener.startStatement();
-			try {
-				while (parser.hasNextParserObject()) {
+			try 
+			{
+				while (parser.hasNextParserObject()) 
+				{
 					try 
 					{
 						ParserObject object = parser.getNextParserObject();
@@ -271,7 +272,8 @@ public class LanguageParser {
 	 * 
 	 * @throws IOException
 	 */
-	public void close() throws IOException {
+	public void close() throws IOException 
+	{
 		parser.close();
 	}
 

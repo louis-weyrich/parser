@@ -1,0 +1,21 @@
+{
+	"$grammar:grammar-parser":{
+		
+		"$grammar-start:$main":{
+			{"{"} & {:grammar-name-signature} & {":{"} & {"}"}
+		},
+	
+		"grammar-name-signature":{
+			{"\""} & {"$grammar:"} & { [a-zA-Z0-9._-]* } & {"\""}
+		},
+		
+		"$grammar:$nested":{
+			
+		}
+
+	},
+
+	"$keywords":{
+		{"keywords","grammar","grammar-start","main","tokens","ignorable-tokens","token","nested","statement"}
+	}
+}

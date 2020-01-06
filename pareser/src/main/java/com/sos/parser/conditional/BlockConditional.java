@@ -21,7 +21,12 @@ public class BlockConditional implements Conditional {
 		NodeContainer container = listener.getStack().peekTop();
 		MatchedTokenSet tokens = context.getMatchedTokens();
 		
-		if(tokens.containsStart(parserObject.getContent()))
+		if(tokens.containsStart(parserObject.getContent()) && container.getType() == NodeType.DOCUMENT)
+		{
+			listener.startStatement();
+			return true;
+		}
+		else if(tokens.containsStart(parserObject.getContent()))
 		{
 			listener.startNestedBlock(parserObject);
 			return true;

@@ -13,7 +13,7 @@ public class KeywordConditional implements Conditional {
 	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object)
 	throws ParserException 
 	{
-		if(context.getKeywords().contains(object.getContent()))
+		if(context.getKeywords().contains((context.isCaseSensitive())?object.getContent():object.getContent().toLowerCase()))
 		{
 			if(listener.getStack().peekTop().getType() != NodeType.STATEMENT)
 			{

@@ -1,0 +1,8 @@
+/TEST-com.sos.pareser.LanguageParserTest.xml
+/TEST-com.sos.pareser.ParserTest.xml
+/TEST-com.sos.pareser.TokenScannerTest.xml
+/TEST-com.sos.pareser.io.CharacterBufferTest.xml
+/com.sos.pareser.LanguageParserTest.txt
+/com.sos.pareser.ParserTest.txt
+/com.sos.pareser.TokenScannerTest.txt
+/com.sos.pareser.io.CharacterBufferTest.txt

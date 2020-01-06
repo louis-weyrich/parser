@@ -159,11 +159,11 @@ public class DefaultParserListener implements ParserListener
 			NodeContainer nextContainer = nodeStack.peekTop();
 			nextContainer.addContent(container);
 			
-			if(nextContainer.getType() == NodeType.STATEMENT)
-			{
-				endStatement(
-					new ParserObject("",parserObject.getStartIndex(),parserObject.getEndIndex(), null));
-			}
+//			if(nextContainer.getType() == NodeType.STATEMENT)
+//			{
+//				endStatement(
+//					new ParserObject("",parserObject.getStartIndex(),parserObject.getEndIndex(), null));
+//			}
 		}
 		else
 		{

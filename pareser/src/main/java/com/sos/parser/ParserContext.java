@@ -27,6 +27,7 @@ public class ParserContext {
 	private boolean matchQuotes = true;
 	private boolean quoted = false;
 	private boolean showIgnorables = false;
+	private boolean caseSensitive = true;
 	private int initialBufferSize = 20;
 	private int bufferGrowthSize = 20;
 
@@ -105,6 +106,18 @@ public class ParserContext {
 
 	public void setAutoMarkBuffer(boolean autoMarkBuffer) {
 		this.autoMarkBuffer = autoMarkBuffer;
+	}
+
+
+	public boolean isCaseSensitive()
+	{
+		return caseSensitive;
+	}
+
+
+	public void setCaseSensitive(boolean caseSensitive)
+	{
+		this.caseSensitive = caseSensitive;
 	}
 
 

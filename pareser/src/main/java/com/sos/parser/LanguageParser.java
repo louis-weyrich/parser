@@ -89,7 +89,21 @@ public class LanguageParser {
 		}
 		catch(NullPointerException e)
 		{
-			
+			throw new ParserException(e.getMessage());
+		}
+		
+		try
+		{
+			Object caseSensitive = jsonObject.get("caseSensitive");
+			if(caseSensitive != null && !caseSensitive.equals("")) {
+				context.setCaseSensitive(Boolean.parseBoolean(caseSensitive.toString()));
+			}else {
+				context.setCaseSensitive(true);
+			}
+		}
+		catch(Exception e)
+		{
+			throw new ParserException("Could not parse caseSensitive property.");
 		}
 		
 		Object matchQuotes = jsonObject.get("matchQuotes");
@@ -107,40 +121,46 @@ public class LanguageParser {
 		}
 		
 		JSONArray tokensArray = (JSONArray)jsonObject.get("tokens");
-		Iterator <String> tokenIterator = tokensArray.iterator();
-		while(tokenIterator.hasNext()) {
-			String tokenString = tokenIterator.next();
-			if(tokenString.equals("\n")) {
-				context.getParsableTokens().add(Character.valueOf('\n'));
-			}else if(tokenString.equals("\r")) {
-				context.getParsableTokens().add(Character.valueOf('\r'));
-			}else if(tokenString.equals("\t")) {
-				context.getParsableTokens().add(Character.valueOf('\t'));
-			}else {
-				if(tokenString.length() == 1) {
-					context.getParsableTokens().add(Character.valueOf(tokenString.charAt(0)));
+		if(tokensArray != null)
+		{
+			Iterator <String> tokenIterator = tokensArray.iterator();
+			while(tokenIterator.hasNext()) {
+				String tokenString = tokenIterator.next();
+				if(tokenString.equals("\n")) {
+					context.getParsableTokens().add(Character.valueOf('\n'));
+				}else if(tokenString.equals("\r")) {
+					context.getParsableTokens().add(Character.valueOf('\r'));
+				}else if(tokenString.equals("\t")) {
+					context.getParsableTokens().add(Character.valueOf('\t'));
 				}else {
-					throw new ParserException("ignorableTokes can only be single characters.");
+					if(tokenString.length() == 1) {
+						context.getParsableTokens().add(Character.valueOf(tokenString.charAt(0)));
+					}else {
+						throw new ParserException("ignorableTokes can only be single characters.");
+					}
 				}
 			}
 		}
 		
 		
 		JSONArray ignorablesArray = (JSONArray)jsonObject.get("ignorableTokens");
-		Iterator <String> ignorablesArrayIterator = ignorablesArray.iterator();
-		while(ignorablesArrayIterator.hasNext()) {
-			String ignorableText = ignorablesArrayIterator.next();
-			if(ignorableText.equals("\n")) {
-				context.getIgnorableSet().add(Character.valueOf('\n'));
-			}else if(ignorableText.equals("\r")) {
-				context.getIgnorableSet().add(Character.valueOf('\r'));
-			}else if(ignorableText.equals("\t")) {
-				context.getIgnorableSet().add(Character.valueOf('\t'));
-			}else {
-				if(ignorableText.length() == 1) {
-					context.getIgnorableSet().add(Character.valueOf(ignorableText.charAt(0)));
+		if(ignorablesArray != null)
+		{
+			Iterator <String> ignorablesArrayIterator = ignorablesArray.iterator();
+			while(ignorablesArrayIterator.hasNext()) {
+				String ignorableText = ignorablesArrayIterator.next();
+				if(ignorableText.equals("\n")) {
+					context.getIgnorableSet().add(Character.valueOf('\n'));
+				}else if(ignorableText.equals("\r")) {
+					context.getIgnorableSet().add(Character.valueOf('\r'));
+				}else if(ignorableText.equals("\t")) {
+					context.getIgnorableSet().add(Character.valueOf('\t'));
 				}else {
-					throw new ParserException("ignorableTokes can only be single characters.");
+					if(ignorableText.length() == 1) {
+						context.getIgnorableSet().add(Character.valueOf(ignorableText.charAt(0)));
+					}else {
+						throw new ParserException("ignorableTokes can only be single characters.");
+					}
 				}
 			}
 		}
@@ -152,44 +172,57 @@ public class LanguageParser {
 		}
 
 		JSONArray tokenSetJsonArray = (JSONArray)jsonObject.get("tokenSets");
-		Iterator <String> tokenSetIterator = tokenSetJsonArray.iterator();
-		while(tokenSetIterator.hasNext()) {
-			 context.getTokenTree().addTerm(tokenSetIterator.next());
+		if(tokenSetJsonArray != null)
+		{
+			Iterator <String> tokenSetIterator = tokenSetJsonArray.iterator();
+			while(tokenSetIterator.hasNext()) {
+				 context.getTokenTree().addTerm(tokenSetIterator.next());
+			}
 		}
 
 		JSONArray tokensNotAllowedArray = (JSONArray)jsonObject.get("tokensNotAllowed");
-		Iterator <String> tokensNotAllowedIterator = tokensNotAllowedArray.iterator();
-		while(tokensNotAllowedIterator.hasNext()) {
-			String value = tokensNotAllowedIterator.next();
-			if(value.length() == 1) {
-				context.getTokensNotAllowed().add(Character.valueOf(value.charAt(0)));
+		if(tokensNotAllowedArray != null)
+		{
+			Iterator <String> tokensNotAllowedIterator = tokensNotAllowedArray.iterator();
+			while(tokensNotAllowedIterator.hasNext()) {
+				String value = tokensNotAllowedIterator.next();
+				if(value.length() == 1) {
+					context.getTokensNotAllowed().add(Character.valueOf(value.charAt(0)));
+				}
 			}
 		}
 		
 		//Matched Tokens
 		JSONArray matchedTokensArray = (JSONArray)jsonObject.get("matchedTokens");
-		Iterator <JSONObject> matchedTokenesIterator =  matchedTokensArray.iterator();
-		context.getMatchedTokens().setSize(matchedTokensArray.size());
-		while(matchedTokenesIterator.hasNext()) {
-			JSONObject matchTokenObject = matchedTokenesIterator.next();
-			JSONArray matchArray = (JSONArray)matchTokenObject.get("match");
-			if(matchArray.size() == 2) {
-				String startValue = matchArray.get(0).toString();
-				String endValue = matchArray.get(1).toString();
-				context.getMatchedTokens().add(startValue, endValue);
+		if(matchedTokensArray != null)
+		{
+			Iterator <JSONObject> matchedTokenesIterator =  matchedTokensArray.iterator();
+			context.getMatchedTokens().setSize(matchedTokensArray.size());
+			while(matchedTokenesIterator.hasNext()) {
+				JSONObject matchTokenObject = matchedTokenesIterator.next();
+				JSONArray matchArray = (JSONArray)matchTokenObject.get("match");
+				if(matchArray.size() == 2) {
+					String startValue = matchArray.get(0).toString();
+					String endValue = matchArray.get(1).toString();
+					context.getMatchedTokens().add(startValue, endValue);
+				}
 			}
 		}
 		
 		JSONArray keywords = (JSONArray)jsonObject.get("keywords");
-		Iterator <String> keywordIterator =  keywords.iterator();
-		while(keywordIterator.hasNext())
+		if(keywords != null)
 		{
-			String keywordObject = keywordIterator.next();
-			context.getKeywords().add(keywordObject);
+			Iterator <String> keywordIterator =  keywords.iterator();
+			while(keywordIterator.hasNext())
+			{
+				String keywordObject = keywordIterator.next();
+				context.getKeywords().add(
+					(context.isCaseSensitive())?keywordObject:keywordObject.toLowerCase());
+			}
 		}
 				
-		this.listener = listener;
-		listener.setParserContext(context);
+		this.listener = (listener != null)?listener: new DefaultParserListener();
+		this.listener.setParserContext(context);
 		this.parser = new ParserImpl(context);
 		this.context.setParser(parser);
 		

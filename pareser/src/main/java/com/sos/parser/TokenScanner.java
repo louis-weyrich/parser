@@ -250,6 +250,18 @@ public class TokenScanner
 			else
 			{
 				hasNext = !(queue.isEmpty());
+				if(queue.size() == 1)
+				{
+					TokenIndexer index = queue.peek();
+					if(index.getToken() != Character.MIN_VALUE)
+					{
+						TokenIndexer newIndex = new TokenIndexer(
+							Character.MIN_VALUE,index.getStartIndex()+1,buffer, 
+							null);
+						queue.add(newIndex);
+					}
+					
+				}
 			}
 		}
 		catch (IOException e)

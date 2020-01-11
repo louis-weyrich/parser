@@ -4,6 +4,7 @@ import com.sos.parser.ParserContext;
 import com.sos.parser.ParserListener;
 import com.sos.parser.ParserObject;
 import com.sos.parser.exception.ParserException;
+import com.sos.parser.node.NodeContainer;
 import com.sos.parser.node.NodeType;
 
 public class KeywordConditional implements Conditional {
@@ -15,7 +16,8 @@ public class KeywordConditional implements Conditional {
 	{
 		if(context.getKeywords().contains((context.isCaseSensitive())?object.getContent():object.getContent().toLowerCase()))
 		{
-			if(listener.getStack().peekTop().getType() != NodeType.STATEMENT)
+			NodeContainer node = listener.getStack().peekTop();
+			if(node.getType() != NodeType.STATEMENT)
 			{
 				listener.startStatement();
 			}

@@ -18,12 +18,12 @@ public class QuoteConditional implements Conditional {
 		String value = object.getContent();
 		if(context.isMatchQuotes())
 		{
-			if(container.getType() == NodeType.QUOTED_TEXT && (value.equals("\"") || value.equals("\'")))
+			if(container.getType() == NodeType.QUOTED_TEXT && value.length() == 1 && context.getQuoteTokens().contains(value.charAt(0)))
 			{
 				listener.endQuotedText(object);
 				return true;
 			}
-			else if(container.getType() != NodeType.QUOTED_TEXT && (value.equals("\"") || value.equals("\'")))
+			else if(container.getType() != NodeType.QUOTED_TEXT && value.length() == 1 && context.getQuoteTokens().contains(value.charAt(0)))
 			{
 				if(listener.getStack().peekTop().getType() != NodeType.STATEMENT)
 				{
@@ -33,16 +33,11 @@ public class QuoteConditional implements Conditional {
 				listener.startQuotedText(object);
 				return true;
 			}
-			else if(container.getType() == NodeType.QUOTED_TEXT && !(value.equals("\"") || value.equals("\'")))
+			else if(container.getType() == NodeType.QUOTED_TEXT && !context.getQuoteTokens().contains(value.charAt(0)))
 			{
 				listener.addText(object);
 				return true;
 			}
-		}
-		else if(container.getType() == NodeType.QUOTED_TEXT)
-		{
-			listener.parsedToken(object);
-			return true;
 		}
 		
 		return false;

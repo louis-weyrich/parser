@@ -15,38 +15,48 @@ public class BlockConditional implements Conditional {
 
 	public BlockConditional() {}
 
-	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject parserObject)
+	public boolean evaluate(ParserContext context, ParserListener listener, ParserObject object)
 	throws ParserException 
 	{
 		NodeContainer container = listener.getStack().peekTop();
 		MatchedTokenSet tokens = context.getMatchedTokens();
 		
-		if(tokens.containsStart(parserObject.getContent()) && container.getType() == NodeType.DOCUMENT)
+		if(tokens.containsStart(object.getContent()) && container.getType() == NodeType.DOCUMENT)
 		{
 			listener.startStatement();
 			return true;
 		}
-		else if(tokens.containsStart(parserObject.getContent()))
+		else if(tokens.containsStart(object.getContent()))
 		{
-			listener.startNestedBlock(parserObject);
+			listener.startNestedBlock(object);
 			return true;
 		}
-		else if(container.getType() == NodeType.BLOCK)
+		else if(context.getMatchedTokens().containsEnd(object.getContent()))
 		{
-			Block block = (Block)container;
-			
-			if(block.getChildren().size() > 0)
+			if(container.getType() == NodeType.STATEMENT)
 			{
-				NodeContainer node = block.getChildren().get(0);
+				listener.endStatement(
+					new ParserObject("",object.getStartIndex(),object.getEndIndex(),null));
+				container = listener.getStack().peekTop();
+			}
+			
+			if(container.getType() == NodeType.BLOCK)
+			{
+				Block block = (Block)container;
 				
-				if(node.getType() == NodeType.TOKEN)
+				if(block.getChildren().size() > 0)
 				{
-					Token token = (Token)node;
-					MatchedToken matched = tokens.getByStart(token.getContent());
-					if(matched.getEnd().equals(parserObject.getContent().toString()))
+					NodeContainer node = block.getChildren().get(0);
+					
+					if(node.getType() == NodeType.TOKEN)
 					{
-						listener.endNestedBlock(parserObject);					
-						return true;
+						Token token = (Token)node;
+						MatchedToken matched = tokens.getByStart(token.getContent());
+						if(matched.getEnd().equals(object.getContent().toString()))
+						{
+							listener.endNestedBlock(object);					
+							return true;
+						}
 					}
 				}
 			}

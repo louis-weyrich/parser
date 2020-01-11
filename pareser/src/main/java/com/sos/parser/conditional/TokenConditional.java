@@ -18,7 +18,7 @@ public class TokenConditional implements Conditional {
 		
 		if(context.getParsableTokens().contains(object.getContent()))
 		{
-			if(node.getType() != NodeType.STATEMENT && node.getType() != NodeType.BLOCK)
+			if(node.getType() != NodeType.STATEMENT)
 			{
 				listener.startStatement();
 			}
@@ -28,7 +28,7 @@ public class TokenConditional implements Conditional {
 		}
 		else if(context.getTokenTree().containsText(object.getContent()))
 		{
-			if(node.getType() != NodeType.STATEMENT && node.getType() != NodeType.BLOCK)
+			if(node.getType() != NodeType.STATEMENT)
 			{
 				listener.startStatement();
 			}
@@ -38,7 +38,7 @@ public class TokenConditional implements Conditional {
 		}
 		else 
 		{
-			if(node.getType() != NodeType.STATEMENT && node.getType() != NodeType.BLOCK)
+			if(node.getType() != NodeType.STATEMENT)
 			{
 				listener.startStatement();
 			}

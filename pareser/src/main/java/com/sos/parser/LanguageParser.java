@@ -6,8 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -25,6 +29,17 @@ import com.sos.parser.conditional.TokenConditional;
 //import com.sos.parser.conditional.TokenSetConditional;
 import com.sos.parser.exception.ParserException;
 import com.sos.parser.node.NodeContainer;
+import com.sos.parser.node.NodeType;
+import com.sos.parser.validation.BlockValidator;
+import com.sos.parser.validation.DocumentValidator;
+import com.sos.parser.validation.IgnorableValidator;
+import com.sos.parser.validation.KeywordValidator;
+import com.sos.parser.validation.NotAllowedValidator;
+import com.sos.parser.validation.QuotedTextValidator;
+import com.sos.parser.validation.StatementValidator;
+import com.sos.parser.validation.TextValidator;
+import com.sos.parser.validation.TokenValidator;
+import com.sos.parser.validation.Validator;
 
 public class LanguageParser {
 	
@@ -75,16 +90,42 @@ public class LanguageParser {
 			throw new ParserException("Could not parse bufferGrowthSize property.");
 		}
 		
-		try 
+		try
 		{
-			Object statementEnd = jsonObject.get("statementEnd");
-			if(statementEnd == null || statementEnd.equals("") || !(statementEnd.toString().length() > 1))
+			Object debug = jsonObject.get("debug");
+			if(debug != null)
 			{
-				context.setStatementEnd(Character.valueOf(statementEnd.toString().charAt(0)));
+				boolean db = debug.toString().equals(Boolean.TRUE.toString());
+				context.setDebug(db);
 			}
 			else
 			{
-				context.setStatementEnd(';');
+				context.setDebug(false);
+			}
+		}
+		catch(Exception e)
+		{
+			
+		}
+		
+		try 
+		{
+			JSONArray statementEndArray = (JSONArray)jsonObject.get("statementEnd");
+			if(statementEndArray != null)
+			{
+				Iterator <String> iterator = statementEndArray.iterator();
+				while(iterator.hasNext())
+				{
+					String value = iterator.next();
+					if(value != null && value.length() == 1)
+					{
+						context.getStatementEnd().add(Character.valueOf(value.charAt(0)));
+					}
+				}
+			}
+			else
+			{
+				context.getStatementEnd().add(';');
 			}
 		}
 		catch(NullPointerException e)
@@ -111,6 +152,25 @@ public class LanguageParser {
 			context.setMatchQuotes(Boolean.parseBoolean(matchQuotes.toString()));
 		}else {
 			context.setMatchQuotes(true);
+		}
+		
+		JSONArray quoteArray = (JSONArray)jsonObject.get("quoteTokens");
+		if(quoteArray != null)
+		{
+			Iterator <String> iterator = quoteArray.iterator();
+			while(iterator.hasNext())
+			{
+				String quote = iterator.next();
+				if(quote.length() == 1)
+				{
+					context.getQuoteTokens().add(quote.charAt(0));
+				}
+			}
+		}
+		else
+		{
+			context.getQuoteTokens().add(new Character('\"'));
+			context.getQuoteTokens().add(new Character('\''));
 		}
 
 		Object autoMarkBuffer = jsonObject.get("autoMarkBuffer");
@@ -168,7 +228,7 @@ public class LanguageParser {
 		Object parseIgnorable = jsonObject.get("showIgnorable");
 		if(parseIgnorable != null)
 		{
-			context.setShowIgnorables(Boolean.getBoolean(parseIgnorable.toString()));
+			context.setShowIgnorables("true".equalsIgnoreCase((parseIgnorable.toString().trim())));
 		}
 
 		JSONArray tokenSetJsonArray = (JSONArray)jsonObject.get("tokenSets");
@@ -219,6 +279,17 @@ public class LanguageParser {
 				context.getKeywords().add(
 					(context.isCaseSensitive())?keywordObject:keywordObject.toLowerCase());
 			}
+		}
+		
+		JSONArray validators = (JSONArray)jsonObject.get("validators");
+		if(validators != null)
+		{
+			configureDefaultValidators();
+			configureValidators(validators);
+		}
+		else
+		{
+			configureDefaultValidators();
 		}
 				
 		this.listener = (listener != null)?listener: new DefaultParserListener();
@@ -275,6 +346,10 @@ public class LanguageParser {
 					try 
 					{
 						ParserObject object = parser.getNextParserObject();
+						if(context.isDebug())
+						{
+							System.out.print(object.getContent());
+						}
 						
 						for(Conditional conditional : conditionals)
 						{
@@ -295,11 +370,101 @@ public class LanguageParser {
 			}
 		}
 		
+		if(listener.getStack().peekTop().getType() != NodeType.DOCUMENT)
+		{
+			switch(listener.getStack().peekTop().getType())
+			{
+				case STATEMENT :
+				{
+					listener.endStatement(new ParserObject("", 0,0,null));
+					break;
+				}
+				case BLOCK :
+				{
+					listener.endNestedBlock(new ParserObject("", 0,0,null));
+					break;
+				}
+				case QUOTED_TEXT :
+				{
+					listener.endQuotedText(new ParserObject("", 0,0,null));
+					break;
+				}
+				default :
+				{
+					
+				}
+			}
+		}
+		
 		this.parser.close();
 		listener.endDocument(new ParserObject("",0,0,null));
 		return listener.getStack().popTop();
 	}
 	
+	protected void configureValidators(JSONArray validatorArray) throws ParserException
+	{
+		Set <String> keys = new HashSet <String> ();
+		keys.add("block");keys.add("document");keys.add("ignorable-token");
+		keys.add("keyword");keys.add("not-allowed");keys.add("quoted-text");
+		keys.add("statement");keys.add("text");keys.add("token");
+		
+		Iterator <JSONObject> iterator = validatorArray.iterator();
+		while(iterator.hasNext())
+		{
+			JSONObject json = iterator.next();
+			Set <String> keySet = json.keySet();
+			Iterator <String> keySetIterator = keySet.iterator();
+			while(keySetIterator.hasNext())
+			{
+				String key = keySetIterator.next();
+				if(keys.contains(key))
+				{
+					Object object = json.get(key);
+					ClassLoader loader = this.getClass().getClassLoader();
+					try
+					{
+						Class <Validator> validator = (Class<Validator>)loader.loadClass(object.toString());
+						try
+						{
+							context.getValidators().put(key, (Validator)validator.newInstance());
+						} 
+						catch (InstantiationException e)
+						{
+							throw new ParserException(e);
+						} 
+						catch (IllegalAccessException e)
+						{
+							throw new ParserException(e);
+						}
+					} 
+					catch (ClassNotFoundException e)
+					{
+						throw new ParserException(e);
+					}
+				}
+				else
+				{
+					throw new ParserException("validator key ("+key+") is not defined.");
+				}
+			}
+		}
+	}
+	
+	
+	protected void configureDefaultValidators()
+	{
+		Map <String, Validator> validators = new HashMap <String , Validator> ();
+		validators.put("block", new BlockValidator());
+		validators.put("document", new DocumentValidator());
+		validators.put("ignorable-token", new IgnorableValidator());
+		validators.put("keyword", new KeywordValidator());
+		validators.put("not-allowed", new NotAllowedValidator());
+		validators.put("quoted-text", new QuotedTextValidator());
+		validators.put("statement", new StatementValidator());
+		validators.put("text", new TextValidator());
+		validators.put("token", new TokenValidator());
+		context.setValidators(validators);
+	}
 	
 	/**
 	 * 

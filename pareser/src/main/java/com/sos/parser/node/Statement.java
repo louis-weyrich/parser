@@ -2,6 +2,7 @@ package com.sos.parser.node;
 
 import com.sos.parser.ParserContext;
 import com.sos.parser.exception.ParserException;
+import com.sos.parser.validation.Validator;
 
 public class Statement extends ChildContainer{
 	
@@ -15,9 +16,25 @@ public class Statement extends ChildContainer{
 		return NodeType.STATEMENT;
 	}
 
-	public void validate(ParserContext cntxt) throws ParserException  {
-		// TODO Auto-generated method stub
+	public void validate(ParserContext context) throws ParserException  {
+		Validator validator = context.getValidators().get("statement");
+		if(validator != null)
+		{
+			validator.validate(context);
+		}
+	}
+	
+	@Override
+	public String toString()
+	{
+		StringBuilder builder = new StringBuilder();
 		
+		for(NodeContainer node : this.children)
+		{
+			builder.append(node.toString());
+		}
+		
+		return builder.toString();
 	}
 
 }

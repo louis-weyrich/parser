@@ -2,6 +2,7 @@ package com.sos.parser.node;
 
 import com.sos.parser.ParserContext;
 import com.sos.parser.exception.ParserException;
+import com.sos.parser.validation.Validator;
 
 public class Document extends ChildContainer{
 
@@ -15,9 +16,12 @@ public class Document extends ChildContainer{
 		return NodeType.DOCUMENT;
 	}
 
-	public void validate(ParserContext cntxt) throws ParserException  {
-		// TODO Auto-generated method stub
-		
+	public void validate(ParserContext context) throws ParserException  {
+		Validator validator = context.getValidators().get("document");
+		if(validator != null)
+		{
+			validator.validate(context);
+		}
 	}
 
 }

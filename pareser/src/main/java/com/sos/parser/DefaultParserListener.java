@@ -158,12 +158,6 @@ public class DefaultParserListener implements ParserListener
 		{
 			NodeContainer nextContainer = nodeStack.peekTop();
 			nextContainer.addContent(container);
-			
-//			if(nextContainer.getType() == NodeType.STATEMENT)
-//			{
-//				endStatement(
-//					new ParserObject("",parserObject.getStartIndex(),parserObject.getEndIndex(), null));
-//			}
 		}
 		else
 		{
@@ -255,15 +249,6 @@ public class DefaultParserListener implements ParserListener
 		QuotedText text = new QuotedText();
 		text.addContent(new Token(parserObject.getContent()));
 		
-		try
-		{
-			text.validate(context);
-		}
-		catch(ParserException e)
-		{
-			text.addContent(new NodeException(e, parserObject));
-			exceptions.add(e);
-		}
 		
 		if(nodeStack.peekTop() != null)
 		{
@@ -282,16 +267,7 @@ public class DefaultParserListener implements ParserListener
 	 */
 	public void addText(ParserObject parserObject)
 	{
-		if(nodeStack.peekTop().getType() != NodeType.QUOTED_TEXT)
-		{
-			nodeStack.peekTop().addContent(new Text(parserObject.getContent()));
-		}
-		else
-		{
-			ParserException e = new ParserException("Unable to add text("+parserObject.getContent()+")");
-			nodeStack.peekTop().addContent(new NodeException(e, parserObject));
-			exceptions.add(e);
-		}
+		nodeStack.peekTop().addContent(new Text(parserObject.getContent()));
 	}
 
 	/**

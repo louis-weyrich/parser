@@ -4,6 +4,7 @@ import com.sos.parser.ParserContext;
 import com.sos.parser.ParserListener;
 import com.sos.parser.ParserObject;
 import com.sos.parser.exception.ParserException;
+import com.sos.parser.node.NodeContainer;
 import com.sos.parser.node.NodeType;
 
 public class NotAllowedConditional implements Conditional {
@@ -15,12 +16,17 @@ public class NotAllowedConditional implements Conditional {
 	{
 		if(object.getContent().length() == 1 && context.getTokensNotAllowed().contains(object.toString().charAt(0)))
 		{
-			if(listener.getStack().peekTop().getType() != NodeType.STATEMENT)
+			NodeContainer node = listener.getStack().peekTop();
+			if(node.getType() != NodeType.STATEMENT && node.getType() != NodeType.QUOTED_TEXT)
 			{
 				listener.startStatement();
 			}
 			
-			listener.tokenNotAllowed(object);
+			if(node.getType() != NodeType.QUOTED_TEXT)
+			{
+				listener.tokenNotAllowed(object);
+			}
+			
 			return true;
 		}
 		return false;

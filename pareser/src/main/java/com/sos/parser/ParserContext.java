@@ -8,6 +8,7 @@ import java.util.Set;
 import com.sos.parser.utils.CharacterSet;
 import com.sos.parser.utils.MatchedTokenSet;
 import com.sos.parser.utils.trie.TrieCharTree;
+import com.sos.parser.validation.Validator;
 
 public class ParserContext {
 	
@@ -16,11 +17,13 @@ public class ParserContext {
 	private CharacterSet tokensNotAllowed;
 	private Set <Character> ignorableSet;
 	private Set <String> keywords;
-	private Character statementEnd;
+	private Set <Character> statementEnd;
 	private MatchedTokenSet matchedTokens;
+	private Set <Character> quoteTokens;
 
 	
 	private Map <String, String> operatorMap;
+	private Map <String, Validator> validators;
 	private Parser parser;
 	private int bufferSize;
 	private boolean autoMarkBuffer = true;
@@ -28,6 +31,7 @@ public class ParserContext {
 	private boolean quoted = false;
 	private boolean showIgnorables = false;
 	private boolean caseSensitive = true;
+	private boolean debug = false;
 	private int initialBufferSize = 20;
 	private int bufferGrowthSize = 20;
 
@@ -77,6 +81,22 @@ public class ParserContext {
 	}
 
 
+	public Map<String, Validator> getValidators()
+	{
+		if(validators != null)
+		{
+			validators = new HashMap <String, Validator> ();
+		}
+		return validators;
+	}
+
+
+	public void setValidators(Map<String, Validator> validators)
+	{
+		this.validators = validators;
+	}
+
+
 	public CharacterSet getParsableTokens() {
 		if(this.parsableTokens == null) {
 			this.parsableTokens = new CharacterSet();
@@ -121,27 +141,44 @@ public class ParserContext {
 	}
 
 
-	public int getBufferSize() {
+	public boolean isDebug()
+	{
+		return debug;
+	}
+
+
+	public void setDebug(boolean debug)
+	{
+		this.debug = debug;
+	}
+
+
+	public int getBufferSize() 
+	{
 		return bufferSize;
 	}
 
 
-	public void setBufferSize(int bufferSize) {
+	public void setBufferSize(int bufferSize) 
+	{
 		this.bufferSize = bufferSize;
 	}
 
 
-	public int getInitialBufferSize() {
+	public int getInitialBufferSize() 
+	{
 		return initialBufferSize;
 	}
 
 
-	public void setInitialBufferSize(int initialBufferSize) {
+	public void setInitialBufferSize(int initialBufferSize) 
+	{
 		this.initialBufferSize = initialBufferSize;
 	}
 
 
-	public int getBufferGrowthSize() {
+	public int getBufferGrowthSize() 
+	{
 		return bufferGrowthSize;
 	}
 
@@ -151,8 +188,10 @@ public class ParserContext {
 	}
 
 
-	public CharacterSet getTokensNotAllowed() {
-		if(tokensNotAllowed == null) {
+	public CharacterSet getTokensNotAllowed() 
+	{
+		if(tokensNotAllowed == null) 
+		{
 			tokensNotAllowed = new CharacterSet();
 		}
 		
@@ -160,12 +199,14 @@ public class ParserContext {
 	}
 
 
-	public void setTokensNotAllowed(CharacterSet tokensNotAllowed) {
+	public void setTokensNotAllowed(CharacterSet tokensNotAllowed) 
+	{
 		this.tokensNotAllowed = tokensNotAllowed;
 	}
 
 
-	public Set<String> getKeywords() {
+	public Set<String> getKeywords() 
+	{
 		if(keywords == null) {
 			this.keywords = new HashSet <String> ();
 		}
@@ -173,22 +214,30 @@ public class ParserContext {
 	}
 
 
-	public void setKeywords(Set<String> keywords) {
+	public void setKeywords(Set<String> keywords) 
+	{
 		this.keywords = keywords;
 	}
 
 
-	public Character getStatementEnd() {
+	public Set <Character> getStatementEnd() 
+	{
+		if(statementEnd == null)
+		{
+			statementEnd = new HashSet <Character> ();
+		}
 		return statementEnd;
 	}
 
 
-	public void setStatementEnd(Character statementEnd) {
+	public void setStatementEnd(Set <Character> statementEnd) 
+	{
 		this.statementEnd = statementEnd;
 	}
 
 
-	public MatchedTokenSet getMatchedTokens() {
+	public MatchedTokenSet getMatchedTokens() 
+	{
 		if(matchedTokens == null) {
 			matchedTokens = new MatchedTokenSet();
 		}
@@ -196,42 +245,66 @@ public class ParserContext {
 	}
 
 
-	public void setMatchedTokens(MatchedTokenSet matchedTokens) {
+	public void setMatchedTokens(MatchedTokenSet matchedTokens) 
+	{
 		this.matchedTokens = matchedTokens;
 	}
 
 
-	public boolean isMatchQuotes() {
+	public Set<Character> getQuoteTokens()
+	{
+		if(quoteTokens == null)
+		{
+			quoteTokens = new HashSet <Character> ();
+		}
+		return quoteTokens;
+	}
+
+
+	public void setQuoteTokens(Set<Character> quoteTokens)
+	{
+		this.quoteTokens = quoteTokens;
+	}
+
+
+	public boolean isMatchQuotes() 
+	{
 		return matchQuotes;
 	}
 
 
-	public void setMatchQuotes(boolean matchQuotes) {
+	public void setMatchQuotes(boolean matchQuotes) 
+	{
 		this.matchQuotes = matchQuotes;
 	}
 
 
-	public boolean isQuoted() {
+	public boolean isQuoted() 
+	{
 		return quoted;
 	}
 
 
-	public void setQuoted(boolean quoted) {
+	public void setQuoted(boolean quoted) 
+	{
 		this.quoted = quoted;
 	}
 	
 
-	public boolean isShowIgnorables() {
+	public boolean isShowIgnorables() 
+	{
 		return showIgnorables;
 	}
 
 
-	public void setShowIgnorables(boolean parseIgnorables) {
+	public void setShowIgnorables(boolean parseIgnorables) 
+	{
 		this.showIgnorables = parseIgnorables;
 	}
 
 
-	public void switchQuoted() {
+	public void switchQuoted() 
+	{
 		this.quoted = !quoted;
 	}
 }
